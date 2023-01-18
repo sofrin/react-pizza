@@ -1,15 +1,15 @@
 import axios from 'axios';
+import qs from 'qs';
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import qs from 'qs';
 import { useNavigate } from 'react-router-dom';
+
 import { searchContext } from '../App';
 import Categories from '../components/Categories';
 import PizzaBlock from '../components/PizzaBlock/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 import { Search } from '../components/Search';
 import Sort from '../components/Sort';
-
 import { setCategoryId } from '../redux/slices/filteredSlice';
 
 export const Home = () => {
