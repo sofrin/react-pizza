@@ -1,21 +1,25 @@
 import axios from 'axios';
 import qs from 'qs';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { searchContext } from '../App';
 import Categories from '../components/Categories';
+import { Pagination } from '../components/Pagination';
 import PizzaBlock from '../components/PizzaBlock/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 import { Search } from '../components/Search';
-import Sort from '../components/Sort';
-import { setCategoryId } from '../redux/slices/filteredSlice';
+import Sort, { sortList } from '../components/Sort';
+import { setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filteredSlice';
 
 export const Home = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const { categoryId, sort } = useSelector((state) => state.filter);
+	const isSearch = useRef(false);
+	const { categoryId, sort, currentPage } = useSelector(
+		(state) => state.filter,
+	);
 
 	const [items, setItems] = useState([]);
 	const [isLoading, setisLoading] = useState(true);
@@ -24,8 +28,8 @@ export const Home = () => {
 	const onChangeCategory = (id) => {
 		dispatch(setCategoryId(id));
 	};
-
-	useEffect(() => {
+	const onChangePage = (number) => dispatch(setCurrentPage(number));
+	const fetchPizzas = () => {
 		const controller = new AbortController();
 		setisLoading(true);
 		const order = sort.sortProperty.includes('-') ? 'asc' : 'desc';
@@ -35,7 +39,7 @@ export const Home = () => {
 
 		axios
 			.get(
-				`https://62a75d89bedc4ca6d7c7c8ee.mockapi.io/items?${category}&sortBy=${sortBy}&order=${order}${search}`,
+				`https://62a75d89bedc4ca6d7c7c8ee.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`,
 				{
 					signal: controller.signal,
 				},
@@ -44,19 +48,43 @@ export const Home = () => {
 				setItems(res.data);
 				setisLoading(false);
 			});
-		window.scrollTo(0, 0);
+
 		return () => {
 			controller.abort();
 		};
-	}, [categoryId, sort.sortProperty, searchValue]);
+	};
+	useEffect(() => {
+		if (window.location.search) {
+			const params = qs.parse(window.location.search.substring(1));
+			const sort = sortList.find(
+				(obj) => obj.sortProperty === params.sortProperty,
+			);
+			dispatch(
+				setFilters({
+					...params,
+					sort,
+				}),
+			);
+			isSearch.current = true;
+		}
+	}, [dispatch, isSearch]);
+
+	useEffect(() => {
+		window.scrollTo(0, 0);
+		if (!isSearch.current) {
+			fetchPizzas();
+		}
+		isSearch.current = false;
+	}, [categoryId, sort.sortProperty, searchValue, currentPage]);
 	useEffect(() => {
 		const queryString = qs.stringify({
 			sortProperty: sort.sortProperty,
 			categoryId,
 			searchValue,
+			currentPage,
 		});
 		navigate(`?${queryString}`);
-	}, [categoryId, sort.sortProperty, searchValue, navigate]);
+	}, [categoryId, sort.sortProperty, searchValue, navigate, currentPage]);
 	return (
 		<div className='container'>
 			<div className='content__top'>
@@ -81,6 +109,10 @@ export const Home = () => {
 							/>
 					  ))}
 			</div>
+			<Pagination
+				currentPage={currentPage}
+				onChangePage={onChangePage}
+			/>
 		</div>
 	);
 };

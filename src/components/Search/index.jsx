@@ -1,5 +1,5 @@
-import React, { useCallback, useContext, useRef, useState } from 'react';
 import debounce from 'lodash.debounce';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 
 import { searchContext } from '../../App';
 import styles from './Search.module.scss';
