@@ -17,6 +17,7 @@ export const Home = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const isSearch = useRef(false);
+	const isMounted = useRef(false);
 	const { categoryId, sort, currentPage } = useSelector(
 		(state) => state.filter,
 	);
@@ -29,30 +30,7 @@ export const Home = () => {
 		dispatch(setCategoryId(id));
 	};
 	const onChangePage = (number) => dispatch(setCurrentPage(number));
-	const fetchPizzas = () => {
-		const controller = new AbortController();
-		setisLoading(true);
-		const order = sort.sortProperty.includes('-') ? 'asc' : 'desc';
-		const sortBy = sort.sortProperty.replace('-', '');
-		const category = categoryId > 0 ? `category=${categoryId}` : '';
-		const search = searchValue ? `&search=${searchValue}` : '';
 
-		axios
-			.get(
-				`https://62a75d89bedc4ca6d7c7c8ee.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`,
-				{
-					signal: controller.signal,
-				},
-			)
-			.then((res) => {
-				setItems(res.data);
-				setisLoading(false);
-			});
-
-		return () => {
-			controller.abort();
-		};
-	};
 	useEffect(() => {
 		if (window.location.search) {
 			const params = qs.parse(window.location.search.substring(1));
@@ -70,6 +48,30 @@ export const Home = () => {
 	}, [dispatch, isSearch]);
 
 	useEffect(() => {
+		const fetchPizzas = () => {
+			const controller = new AbortController();
+			setisLoading(true);
+			const order = sort.sortProperty.includes('-') ? 'asc' : 'desc';
+			const sortBy = sort.sortProperty.replace('-', '');
+			const category = categoryId > 0 ? `category=${categoryId}` : '';
+			const search = searchValue ? `&search=${searchValue}` : '';
+
+			axios
+				.get(
+					`https://62a75d89bedc4ca6d7c7c8ee.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`,
+					{
+						signal: controller.signal,
+					},
+				)
+				.then((res) => {
+					setItems(res.data);
+					setisLoading(false);
+				});
+
+			return () => {
+				controller.abort();
+			};
+		};
 		window.scrollTo(0, 0);
 		if (!isSearch.current) {
 			fetchPizzas();
@@ -77,13 +79,16 @@ export const Home = () => {
 		isSearch.current = false;
 	}, [categoryId, sort.sortProperty, searchValue, currentPage]);
 	useEffect(() => {
-		const queryString = qs.stringify({
-			sortProperty: sort.sortProperty,
-			categoryId,
-			searchValue,
-			currentPage,
-		});
-		navigate(`?${queryString}`);
+		if (isMounted.current) {
+			const queryString = qs.stringify({
+				sortProperty: sort.sortProperty,
+				categoryId,
+				searchValue,
+				currentPage,
+			});
+			navigate(`?${queryString}`);
+		}
+		isMounted.current = true;
 	}, [categoryId, sort.sortProperty, searchValue, navigate, currentPage]);
 	return (
 		<div className='container'>
