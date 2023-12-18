@@ -17,7 +17,7 @@ type PizzaItem = {
 	types: number[];
 };
 
-interface PizzaSliceState {
+export interface PizzaSliceState {
 	items: PizzaItem[];
 	status: 'loading' | 'success' | 'error';
 }

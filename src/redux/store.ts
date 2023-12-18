@@ -4,10 +4,14 @@ import cart from './slices/cartSlice';
 import filter from './slices/filteredSlice';
 import pizza from './slices/pizzaSlice';
 import { useDispatch } from 'react-redux';
-const store = configureStore({
-	reducer: { filter, cart, pizza },
-});
 
+const store = configureStore({
+	reducer: {
+		cart,
+		filter,
+		pizza,
+	},
+});
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 export const useAppDispatch: () => AppDispatch = useDispatch;
