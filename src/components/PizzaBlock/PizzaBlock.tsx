@@ -5,13 +5,13 @@ import { Link } from 'react-router-dom';
 import { RootState } from '../../redux/store';
 
 type PizzaBlockProps = {
-  id: string,
-  title: string,
-  price: number,
-  imageUrl: string,
-  sizes: number[],
-  types: number[],
-}
+  id: string;
+  title: string;
+  price: number;
+  imageUrl: string;
+  sizes: number[];
+  types: number[];
+};
 
 const PizzaBlock: React.FC<PizzaBlockProps> = ({
   id,
@@ -40,22 +40,20 @@ const PizzaBlock: React.FC<PizzaBlockProps> = ({
       imageUrl,
       type: typeNames[activeType],
       size: sizes[activeSize],
-      count: 0
+      count: 0,
     };
     dispatch(addItem(item));
   };
   return (
     <div className='pizza-block-wrapper'>
       <div className='pizza-block'>
-        <Link
-
-          to={`/pizza/${id}`}
-        >
+        <Link to={`/pizza/${id}`}>
           <img
             className='pizza-block__image'
             src={imageUrl}
             alt='Pizza'
-          /> </Link>
+          />{' '}
+        </Link>
         <h4 className='pizza-block__title'>{title}</h4>
         <div className='pizza-block__selector'>
           <ul>
@@ -106,5 +104,5 @@ const PizzaBlock: React.FC<PizzaBlockProps> = ({
       </div>
     </div>
   );
-}
-export default PizzaBlock
+};
+export default PizzaBlock;
